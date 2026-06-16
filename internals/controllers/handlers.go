@@ -49,53 +49,51 @@ func isExists(str string) (bool, string) {	// Checks if the key exists in the ha
 	}
 }
 
-func EXISTS(str string) {	// Calls isExists and prints value accordingly
+func EXISTS(str string) string {	// Calls isExists and prints value accordingly
 	check, _ := isExists(str)
 	if check == true {
-		fmt.Println("YES")
+		return "YES"
 	} else {
-		fmt.Println("NO")
+		return "NO"
 	}
 }
 
-func GetArranger(str string) {	// GET 
+func GetArranger(str string) string {	// GET 
 	check, val := isExists(str)
 	if check == true {
-		fmt.Println(val)
+		return val
 	} else {
-		fmt.Println("Invalid Operation - No such value exists")
+		return "Invalid Operation - No such value exists"
 	}
 }
 
-func SetArranger(firstWord string, rem []string) {
+func SetArranger(firstWord string, rem []string) string {
 	models.SETHashCommand[rem[0]] = rem[1]
-	fmt.Println("OK")
+	return "Okay"
 }
 
-func Checker(firstWord string, rem []string) {
+func Checker(firstWord string, rem []string) string {
 	if firstWord == "SET" {
 		if len(rem) != 2 {
-			fmt.Println("Check again")
-			return
+			return "Check again"
 		}
-		SetArranger(firstWord, rem)
+		return SetArranger(firstWord, rem)
 	} else if firstWord == "GET" {
 		if len(rem) != 1 {
-			fmt.Println("Check again")
-			return
+			return "Check again"
 		}
-		GetArranger(rem[0])
+		return GetArranger(rem[0])
 	} else if firstWord == "EXISTS" {
 		if len(rem) != 1 {
-			fmt.Println("Check again")
-			return
+			return "Check again"
 		}
-		EXISTS(rem[0])
+		return EXISTS(rem[0])
 	}
+	return ""
 }
 
-func Organizer(input string) {
+func Organizer(input string) string {
 	// var input string = TakeInput()
 	firstWord, rem := StringParser(input)
-	Checker(firstWord, rem)
+	return Checker(firstWord, rem)
 }
