@@ -3,6 +3,8 @@ package controllers
 import (
 	"bufio"
 	"fmt"
+	"strconv"
+	"time"
 
 	// "io"
 	"os"
@@ -23,11 +25,11 @@ import (
 // 	return input
 // }
 
-func TakeInput() string{
+func TakeInput() string {
 	fmt.Println("Enter the command")
 	reader := bufio.NewReader(os.Stdin)
 	input, _ := reader.ReadString('\n')
-	if input == ""{
+	if input == "" {
 		fmt.Println("Error : Please provide some input")
 		return ""
 	}
@@ -41,9 +43,21 @@ func StringParser(str string) (string, []string) { // Responsible for Parsing th
 	return firstWord, remainingWords
 }
 
-func isExists(str string) (bool, string) {	// Checks if the key exists in the hashmap
+func isExists(str string) (bool, string) { // Checks if the key exists in the hashmap
 	store.DB.Mu.RLock()
-	val := store.DB.Data[str]
+	var val string
+	expiry, exists := store.DB.Expiration[str]
+	if exists {
+		if time.Now().After(expiry) {
+			delete(store.DB.Data, str)
+			delete(store.DB.Expiration, str)
+			val = ""
+		} else {
+			val = store.DB.Data[str]
+		}
+	} else {
+		val = store.DB.Data[str]
+	}
 	store.DB.Mu.RUnlock()
 	if val == "" {
 		return false, ""
@@ -52,7 +66,7 @@ func isExists(str string) (bool, string) {	// Checks if the key exists in the ha
 	}
 }
 
-func EXISTS(str string) string {	// Calls isExists and prints value accordingly
+func EXISTS(str string) string { // Calls isExists and prints value accordingly
 	check, _ := isExists(str)
 	if check == true {
 		return "YES"
@@ -61,7 +75,16 @@ func EXISTS(str string) string {	// Calls isExists and prints value accordingly
 	}
 }
 
-func GetArranger(str string) string {	// GET 
+func TTLchecker(str []string) (string, int) {
+	s := str[0]
+	num, err := strconv.Atoi(str[1])
+	if err != nil {
+		fmt.Println("Error occured while TTL Checking: ", err)
+	}
+	return s, num
+}
+
+func GetArranger(str string) string { // GET
 	check, val := isExists(str)
 	if check == true {
 		return val
@@ -70,7 +93,24 @@ func GetArranger(str string) string {	// GET
 	}
 }
 
-func SetArranger(firstWord string, rem []string) string {
+func TimeDeterminer(num int) time.Time {
+	newTime := time.Now().Add(time.Duration(num) * time.Second)
+	return newTime
+}
+
+func SetExArranger(rem []string) string {
+	store.DB.Mu.Lock()
+	firstWord := rem[0] // extract the first word...ex - name, city
+	words := rem[1:]    // put the rest words all along...ex - Rishi 60
+	str, num := TTLchecker(words)
+	store.DB.Data[firstWord] = str
+	store.DB.Expiration[firstWord] = TimeDeterminer(num) // what to write here ?
+	store.DB.Mu.Unlock()
+	resultStr := fmt.Sprintf("Okay. Data will expire after %d secs", num)
+	return resultStr
+}
+
+func SetArranger(rem []string) string {
 	store.DB.Mu.Lock()
 	store.DB.Data[rem[0]] = rem[1]
 	store.DB.Mu.Unlock()
@@ -82,7 +122,7 @@ func Checker(firstWord string, rem []string) string {
 		if len(rem) != 2 {
 			return "Check again"
 		}
-		return SetArranger(firstWord, rem)
+		return SetArranger(rem)
 	} else if firstWord == "GET" {
 		if len(rem) != 1 {
 			return "Check again"
@@ -93,6 +133,11 @@ func Checker(firstWord string, rem []string) string {
 			return "Check again"
 		}
 		return EXISTS(rem[0])
+	} else if firstWord == "SETEX" {
+		if len(rem) != 3 {
+			return "Check again"
+		}
+		return SetExArranger(rem)
 	}
 	return "Invalid Input: Please check your command"
 }
