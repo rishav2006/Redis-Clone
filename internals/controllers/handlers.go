@@ -94,8 +94,8 @@ func Checker(firstWord string, rem []string) {
 	}
 }
 
-func Organizer() {
-	var input string = TakeInput()
+func Organizer(input string) {
+	// var input string = TakeInput()
 	firstWord, rem := StringParser(input)
 	Checker(firstWord, rem)
 }

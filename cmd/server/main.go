@@ -18,5 +18,4 @@ func main() {
 	// }
 	
 	tcp.TcpConnect();
-	tcp.Tester();
 }
