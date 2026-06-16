@@ -3,12 +3,13 @@ package controllers
 import (
 	"bufio"
 	"fmt"
+
 	// "io"
 	"os"
 	"strings"
 
 	// "github.com/gin-gonic/gin"
-	"github.com/rishav2006/redis-clone/internals/models"
+	"github.com/rishav2006/redis-clone/internals/store"
 )
 
 // func TakeInput1(c *gin.Context) string { // Responsible for taking the input
@@ -41,7 +42,9 @@ func StringParser(str string) (string, []string) { // Responsible for Parsing th
 }
 
 func isExists(str string) (bool, string) {	// Checks if the key exists in the hashmap
-	val := models.SETHashCommand[str]
+	store.DB.Mu.RLock()
+	val := store.DB.Data[str]
+	store.DB.Mu.RUnlock()
 	if val == "" {
 		return false, ""
 	} else {
@@ -68,7 +71,9 @@ func GetArranger(str string) string {	// GET
 }
 
 func SetArranger(firstWord string, rem []string) string {
-	models.SETHashCommand[rem[0]] = rem[1]
+	store.DB.Mu.Lock()
+	store.DB.Data[rem[0]] = rem[1]
+	store.DB.Mu.Unlock()
 	return "Okay"
 }
 
@@ -89,7 +94,7 @@ func Checker(firstWord string, rem []string) string {
 		}
 		return EXISTS(rem[0])
 	}
-	return ""
+	return "Invalid Input: Please check your command"
 }
 
 func Organizer(input string) string {
