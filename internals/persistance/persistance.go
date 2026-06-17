@@ -24,7 +24,7 @@ func SaveSnapshot() {
 		fmt.Println("Some error converting to json", err.Error())
 		return
 	}
-	// filePath := "../../dump.json"
+	
 	err = os.WriteFile("dump.json", jsonData, 0644)
 	if err != nil {
 		fmt.Println("Error printing the output onto the file")

@@ -21,7 +21,7 @@ func HandleConnection(conn net.Conn) {
 
 		fmt.Println("Received:", string(buffer[:n]))
 		msg := string(buffer[:n])
-		answer := controllers.Organizer(msg)
+		answer := controllers.Organizer(msg, conn)
 		conn.Write([]byte(answer))
 	}
 }

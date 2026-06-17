@@ -3,6 +3,7 @@ package controllers
 import (
 	"bufio"
 	"fmt"
+	"net"
 	"strconv"
 	"time"
 
@@ -94,7 +95,7 @@ func SetExArranger(rem []string) string {
 	words := rem[1:]    // put the rest words all along...ex - Rishi 60
 	str, num := TTLchecker(words)
 	store.DB.Data[firstWord] = str
-	store.DB.Expiration[firstWord] = TimeDeterminer(num) // what to write here ?
+	store.DB.Expiration[firstWord] = TimeDeterminer(num)
 	store.DB.Mu.Unlock()
 	persistance.SaveSnapshot()
 	resultStr := fmt.Sprintf("Okay. Data will expire after %d secs", num)
@@ -109,7 +110,23 @@ func SetArranger(rem []string) string {
 	return "Okay"
 }
 
-func Checker(firstWord string, rem []string) string {
+func SubArranger(word string, conn net.Conn) string {
+	store.DB.Subscribers[word] = append(store.DB.Subscribers[word], conn)
+	return "Subscribed to :"+ word
+}
+
+func PubArranger(rem []string) string {
+	chann := rem[0]
+	msg := rem[1]
+	subs := store.DB.Subscribers[chann]
+	fmt.Println("Subscribers:", len(subs))
+	for _, conn := range subs {
+		conn.Write([]byte(msg))
+	}
+	return "Message published successfully"
+}
+
+func Checker(firstWord string, rem []string, conn net.Conn) string {
 	if firstWord == "SET" {
 		if len(rem) != 2 {
 			return "Check again"
@@ -130,12 +147,19 @@ func Checker(firstWord string, rem []string) string {
 			return "Check again"
 		}
 		return SetExArranger(rem)
+	}	else if firstWord == "SUBSCRIBE" {
+		if len(rem) != 1 {
+			return "Check again"
+		}
+		return SubArranger(rem[0], conn)
+	}	else if firstWord == "PUBLISH" {
+		return PubArranger(rem)
 	}
 	return "Invalid Input: Please check your command"
 }
 
-func Organizer(input string) string {
+func Organizer(input string, conn net.Conn) string {
 	// var input string = TakeInput()
 	firstWord, rem := StringParser(input)
-	return Checker(firstWord, rem)
+	return Checker(firstWord, rem, conn)
 }
