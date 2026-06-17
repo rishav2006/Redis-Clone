@@ -2,6 +2,7 @@ package main
 
 import (
 	// "github.com/rishav2006/redis-clone/internals/controllers"
+	"github.com/rishav2006/redis-clone/internals/persistance"
 	"github.com/rishav2006/redis-clone/internals/tcp"
 )
 
@@ -17,5 +18,6 @@ func main() {
 	// 	controllers.Organizer();
 	// }
 	
+	persistance.LoadSnapshot()
 	tcp.TcpConnect();
 }

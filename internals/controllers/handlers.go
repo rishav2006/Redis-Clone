@@ -11,19 +11,9 @@ import (
 	"strings"
 
 	// "github.com/gin-gonic/gin"
+	"github.com/rishav2006/redis-clone/internals/persistance"
 	"github.com/rishav2006/redis-clone/internals/store"
 )
-
-// func TakeInput1(c *gin.Context) string { // Responsible for taking the input
-// 	fmt.Println("Enter the command")
-// 	input := string(jsonData)
-// 	// reader := bufio.NewReader(os.Stdin)
-// 	if input == "" {
-// 		fmt.Println("Error : Please provide some input")
-// 		return ""
-// 	}
-// 	return input
-// }
 
 func TakeInput() string {
 	fmt.Println("Enter the command")
@@ -106,6 +96,7 @@ func SetExArranger(rem []string) string {
 	store.DB.Data[firstWord] = str
 	store.DB.Expiration[firstWord] = TimeDeterminer(num) // what to write here ?
 	store.DB.Mu.Unlock()
+	persistance.SaveSnapshot()
 	resultStr := fmt.Sprintf("Okay. Data will expire after %d secs", num)
 	return resultStr
 }
@@ -114,6 +105,7 @@ func SetArranger(rem []string) string {
 	store.DB.Mu.Lock()
 	store.DB.Data[rem[0]] = rem[1]
 	store.DB.Mu.Unlock()
+	persistance.SaveSnapshot()
 	return "Okay"
 }
 
