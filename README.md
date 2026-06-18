@@ -14,10 +14,7 @@ A Redis-inspired in-memory key-value database built in Go, designed to explore s
 • Graceful handling of invalid commands and malformed requests
 
 ## Architecture
-
-Here's a README section for that commands table:
-
-Here's the fixed README with proper alignment:
+![Logo Description](https://i.ibb.co/sdDVX1yV/diagram-export-6-18-2026-1-43-58-PM.png)
 
 ## Implemented Commands
 ```markdown
@@ -63,8 +60,8 @@ Here's the fixed README with proper alignment:
 ## Running the Project
 ### Clone the Repository
 ```markdown
-git clone https://github.com/rishav2006/Redis-Clone.git
-cd Redis-Clone
+git clone https://github.com/rishav2006/GoCacheDB.git
+cd GoCacheDB
 ```
 
 ### Start Main Server
